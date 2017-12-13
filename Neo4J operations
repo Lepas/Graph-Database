@@ -1,0 +1,48 @@
+Load CSV WITH HEADERS FROM "file:///data.csv" as row CREATE (g:Game{status:row.status,time:toInteger(row.time),id:row.id,home:row.home,score0:toInteger(row.score0),score1:toInteger(row.score1),away:row.away,link:row.link})
+
+
+
+CREATE (n:Module{code:"CSY3024",name:"Databases 3"})
+CREATE (n:Lecturer{name:"Andriotakis Lefteris"})
+CREATE (p:Pathway{code:"C",name:"General Computing"})
+
+DELETE Everything			MATCH (n) DETACH DELETE n
+
+DELETE single node:			MATCH (n:Module) DELETE n
+
+DELETE a node with all its relationships	MATCH (m:Module{code:"CSY3024"}) DETACH DELETE m
+
+Create Relationships 2 ways			MATCH (l:Lecturer),(m:Module) WHERE l.name="Andriotakis Lefteris" AND m.code="CSY3024" CREATE (l)-[t:TEACHES]->(m)
+					MATCH (l:Lecturer{name:"Andriotakis Lefteris"}), (m:Module{code:"CSY3024"}) CREATE (l)-[:TEACHES]->(m)
+CREATE Relationship with properties 		MATCH (l:Lecturer{name:"Andriotakis Lefteris"}), (m:Module{code:"CSY3024"}) CREATE (l)-[:TEACHES{since:"2010"}]->(m) (with properties)
+
+DELETE Relationship 			MATCH (l:Lecturer{name:"Andriotakis Lefteris"})-[t:TEACHES]->(m:Module{code:"CSY3024"}) DELETE t
+DELETE Duplicated Relationship				SAME AS ABOVE
+
+CREATE Constraint 			CREATE CONSTRAINT ON (m:Module) ASSERT m.code is UNIQUE;
+					DROP CONSTRAINT ON (m:Module) ASSERT m.code IS UNIQUE;
+					CREATE INDEX ON :Module(code)
+					DROP INDEX ON :Module(code)
+
+Set Clause new attributes:			MATCH (m:Module{code:"CSY3024"}) SET m.level=6 RETURN m
+
+Adding properties from Maps:			MATCH (m:Module{code:"CSY3024"}) SET m+= {credit:20, desc:"advanced database module"} RETURN m
+
+Copying Prop Between nodes and Relationships	//CREATE (n:Module{code:"CSY2038", name:"Database 2"})//
+				MATCH (m:Module{code:"CSY3024"}), (n:Module{code:"CSY2038"}) SET n=m RETURN m,n
+
+REMOVE a property using NULL 		MATCH (m:Module{code:"CSY3024"}) SET m.desc = NULL RETURN m
+REMOVE a property using REMOVE		MATCH (m:Module{code:"CSY3024"}) REMOVE m.desc RETURN m
+REMOVE Labels  				MATCH (m:Module{code:"CSY3024"}) REMOVE m:Module RETURN m
+ADD Labels				MATCH (m{code:"CSY3024"}) SET m:Module RETURN m
+UPDATE Laber				MATCH (m{code:"CSY3024"}) REMOVE m:Module SET m:module RETURN m
+
+CREATE using MERGE 			MERGE (l:Lecturer{name:"Pantelis"})
+MERGE With ON MATCH SET		MERGE (l:Lecturer{name:"Andriotakis Lefteris"}) ON CREATE SET l.createtime = timestamp()  
+										ON MATCH SET l.foundtime = timestamp()  
+										RETURN l.name, l.createtime, l.foundtime
+
+
+MERGE Relationships			MERGE (l:Lecturer{name:"Andriotakis Lefteris"})-[:TEACHES]->(m:Module{code:"CSY3024"})
+
+
